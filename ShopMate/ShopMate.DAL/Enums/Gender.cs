@@ -1,4 +1,5 @@
-﻿namespace ShopMate.DAL.Enums
+﻿
+namespace ShopMate.DAL.Enums
 {
     public enum Gender
     {
@@ -6,3 +7,6 @@
         Female
     }
 }
+
+
+

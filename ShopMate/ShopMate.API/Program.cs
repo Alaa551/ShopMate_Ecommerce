@@ -25,49 +25,18 @@ namespace ShopMate.API
             // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+
 
             builder.Services.AddDbContext<AppDbContext>(option =>
             {
                 option.UseSqlServer(builder.Configuration.GetConnectionString("cs"));
             });
-            builder.Services.AddScoped<IAccountService, AccountServiceImp>();
-            builder.Services.AddScoped<IAccountRepo, AccountRepoImp>();
-            builder.Services.AddScoped<ITokenService, TokenServiceImp>();
-
-            builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
-            builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
-            builder.Services.AddScoped<IValidator<ResetPasswordDto>, ResetPasswordValidator>();
-
-            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
-            builder.Services.AddScoped<IEmailService, EmailService>();
-
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-                                  options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider
-            )
+                   options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider
+               )
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
-
-            builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
-            {
-                opt.TokenLifespan = TimeSpan.FromMinutes(30);
-            });
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("MyPolicy", policy =>
-                {
-                    policy.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-
-                });
-
-            });
-
 
             builder.Services.AddAuthentication(option =>
             {
@@ -87,6 +56,43 @@ namespace ShopMate.API
                 };
             });
 
+
+
+
+            builder.Services.AddScoped<IAccountService, AccountServiceImp>();
+            builder.Services.AddScoped<IAccountRepo, AccountRepoImp>();
+            builder.Services.AddScoped<ITokenService, TokenServiceImp>();
+
+            builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
+            builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
+            builder.Services.AddScoped<IValidator<ResetPasswordDto>, ResetPasswordValidator>();
+
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+            builder.Services.AddScoped<IEmailService, EmailService>();
+
+
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
+            {
+                opt.TokenLifespan = TimeSpan.FromMinutes(30);
+            });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("MyPolicy", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+
+                });
+
+            });
+
+
+
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
 
             var app = builder.Build();
