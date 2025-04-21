@@ -13,6 +13,7 @@ using ShopMate.DAL.Database.Models;
 using ShopMate.DAL.Repository.Abstraction;
 using ShopMate.DAL.Repository.Implementation;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace ShopMate.API
 {
@@ -24,8 +25,11 @@ namespace ShopMate.API
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
-
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             builder.Services.AddDbContext<AppDbContext>(option =>
             {
@@ -66,9 +70,11 @@ namespace ShopMate.API
             builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
             builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
             builder.Services.AddScoped<IValidator<ResetPasswordDto>, ResetPasswordValidator>();
+            builder.Services.AddScoped<IValidator<UpdateProfileDto>, UpdateProfileValidator>();
 
             builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IFileService, FileServiceImp>();
 
 
             builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>

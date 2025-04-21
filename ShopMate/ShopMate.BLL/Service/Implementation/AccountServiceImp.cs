@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Microsoft.Extensions.Configuration;
 using ShopMate.BLL.DTO.AccountDto;
 using ShopMate.BLL.Mapping;
 using ShopMate.BLL.Service.Abstraction;
@@ -14,25 +13,29 @@ namespace ShopMate.BLL.Service.Implementation
         private readonly IValidator<RegisterDto> _registerValidator;
         private readonly IValidator<LoginDto> _loginValidator;
         private readonly IValidator<ResetPasswordDto> _resetPasswordValidator;
+        private readonly IValidator<UpdateProfileDto> _updateProfileValidator;
+        private readonly IFileService _fileService;
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
-        private readonly IConfiguration _configuration;
 
         public AccountServiceImp(IAccountRepo accountRepo,
                                  IValidator<RegisterDto> registerValidator,
                                  IValidator<LoginDto> loginValidator,
                                  ITokenService tokenService,
                                  IEmailService emailService,
-                                 IConfiguration configuration,
-                                 IValidator<ResetPasswordDto> resetPasswordValidator)
+                                 IValidator<ResetPasswordDto> resetPasswordValidator,
+                                 IFileService fileService,
+                                 IValidator<UpdateProfileDto> updateProfileValidator
+                                 )
         {
             _accountRepo = accountRepo;
             _registerValidator = registerValidator;
             _loginValidator = loginValidator;
             _tokenService = tokenService;
             _emailService = emailService;
-            _configuration = configuration;
             _resetPasswordValidator = resetPasswordValidator;
+            _fileService = fileService;
+            _updateProfileValidator = updateProfileValidator;
         }
 
         #region Confirm Email
@@ -52,7 +55,7 @@ namespace ShopMate.BLL.Service.Implementation
         }
         #endregion
 
-        #region Login,register,google-login
+        #region Login,register
         public async Task<bool> EmailExistsAsync(string email)
         {
             return await _accountRepo.GetUserByEmail(email) != null;
@@ -96,12 +99,13 @@ namespace ShopMate.BLL.Service.Implementation
         public async Task<Result> Register(RegisterDto registerDto)
         {
 
-
             var validationResult = await _registerValidator.ValidateAsync(registerDto);
 
             if (validationResult.IsValid)
             {
                 var user = registerDto.ToApplicationUser();
+                user.ProfileImagePath = await _fileService.SaveFileAsync(registerDto.ProfileImage);
+
 
                 var res = await _accountRepo.CreateUserAsync(user, registerDto.Password!);
                 if (res.Succeeded)
@@ -169,10 +173,94 @@ namespace ShopMate.BLL.Service.Implementation
             };
         }
 
-
         #endregion
+
+
+        #region Update Profile
+        public async Task<Result> UpdateProfileAsync(UpdateProfileDto updateProfileDto)
+        {
+            var user = await _accountRepo.GetUserById(updateProfileDto.Id!);
+            if (user == null)
+            {
+                return new Result
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { "User not found" }
+                };
+            }
+
+
+            var validationResult = await _updateProfileValidator.ValidateAsync(updateProfileDto);
+
+            if (validationResult.IsValid)
+            {
+
+                user.Email = updateProfileDto.Email;
+                user.FirstName = updateProfileDto.FirstName;
+                user.LastName = updateProfileDto.LastName;
+                user.Gender = updateProfileDto.Gender;
+                user.PhoneNumber = updateProfileDto.PhoneNumber;
+
+                var profileImage = updateProfileDto.ProfileImage == null
+                    ? user.ProfileImagePath
+                    : await _fileService.SaveFileAsync(updateProfileDto.ProfileImage);
+                user.ProfileImagePath = profileImage;
+
+                var result = await _accountRepo.UpdateUserAsync(user);
+
+                return new Result
+                {
+                    Succeeded = result.Succeeded,
+                    Errors = result.Errors.Select(e => e.Description).ToList()
+                };
+            }
+            return new Result
+            {
+                Succeeded = false,
+                Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
+            };
+
+        }
+        #endregion
+
+        #region Delete Account,Logout
+        public async Task<Result> DeleteAccount(string id)
+        {
+            var user = await _accountRepo.GetUserById(id);
+            var result = await _accountRepo.DeleteAccount(user);
+
+            if (result.Succeeded)
+            {
+                await DeleteUserImage(user.ProfileImagePath);
+            }
+
+            return new Result
+            {
+                Succeeded = result.Succeeded,
+                Errors = result.Errors.Select(e => e.Description).ToList()
+            };
+
+        }
+        private async Task DeleteUserImage(string profileImagePath)
+        {
+            if (profileImagePath != null)
+            {
+                _fileService.DeleteFileAsync(profileImagePath);
+            }
+        }
+
+        //public async Task LogoutAsync()
+        //{
+        //    await _accountRepo.LogoutAsync();
+        //}
     }
 }
+
+#endregion
+
+
+
+
 
 
 

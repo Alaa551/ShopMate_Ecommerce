@@ -12,6 +12,8 @@ namespace ShopMate.DAL.Database.Models
         public string? Address { get; set; }
         public Gender Gender { get; set; } = Gender.Male;
 
+        public string? ProfileImagePath { get; set; }
+
         public WishList? WishList { get; set; }
 
         public Cart? Cart { get; set; }

@@ -18,6 +18,7 @@ namespace ShopMate.BLL.Mapping
                 Gender = registerDto.Gender,
                 Address = registerDto.Address,
 
+
             };
 
         public static ApplicationUser ToApplicationUser(this LoginDto loginDto) =>

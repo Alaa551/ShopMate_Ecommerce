@@ -15,6 +15,7 @@ namespace ShopMate.API.Controllers
             _accountService = accountService;
         }
 
+        #region Login,Register
         [HttpPost("Login")]
         public async Task<ActionResult> Login(LoginDto loginDto)
         {
@@ -44,8 +45,10 @@ namespace ShopMate.API.Controllers
             }
             return Ok("Registration Succeeded");
         }
+        #endregion
 
 
+        #region Confirm email
         [HttpPost("SendConfirmEmailCode")]
         public async Task<IActionResult> SendConfirmEmailCode(string email)
         {
@@ -69,6 +72,10 @@ namespace ShopMate.API.Controllers
             return Ok("Email confirmed successfully");
         }
 
+
+        #endregion
+
+        #region reset password
 
         [HttpPost("SendResetPasswordLink")]
         public async Task<IActionResult> SendResetPasswordLink(string email)
@@ -98,7 +105,49 @@ namespace ShopMate.API.Controllers
         }
 
 
+        #endregion
 
+        #region Update Profile
+
+        [HttpPut("UpdateProfile")]
+        public async Task<ActionResult> UpdateProfile(UpdateProfileDto profileDto)
+        {
+            var res = await _accountService.UpdateProfileAsync(profileDto);
+            if (!res.Succeeded)
+            {
+                foreach (var error in res.Errors)
+                {
+                    ModelState.AddModelError("", error);
+                }
+                return BadRequest(ModelState);
+            }
+            return Ok("Profile updated Successfully");
+        }
+
+        #endregion
+
+
+        #region Delete Account
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAccount(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest("User ID is required.");
+
+
+            var res = await _accountService.DeleteAccount(id);
+            if (!res.Succeeded)
+            {
+                foreach (var error in res.Errors)
+                {
+                    ModelState.AddModelError("", error);
+                }
+                return BadRequest(ModelState);
+            }
+            return Ok("Account deleted successfully");
+        }
+        #endregion
 
     }
 }

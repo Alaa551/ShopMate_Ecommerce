@@ -7,7 +7,7 @@ namespace ShopMate.DAL.Repository.Abstraction
     public interface IAccountRepo
     {
         Task<IdentityResult> CreateUserAsync(ApplicationUser applicationUser, string password);
-        Task UpdateUserAsync(ApplicationUser applicationUser);
+        Task<IdentityResult> UpdateUserAsync(ApplicationUser applicationUser);
         Task<bool> CheckUserAsync(ApplicationUser applicationUser, string password);
         Task AddClaimsAsync(ApplicationUser applicationUser, IList<Claim> claims);
         Task<ApplicationUser> GetUserByEmail(string email);
@@ -18,5 +18,10 @@ namespace ShopMate.DAL.Repository.Abstraction
 
         Task<string> GetResetPasswordTokenAsync(string email);
         Task<IdentityResult> ResetPasswordAsync(string email, string token, string newPassword);
+        Task<ApplicationUser> GetUserById(string id);
+
+        Task<IdentityResult> DeleteAccount(ApplicationUser user);
+
+        //Task LogoutAsync();
     }
 }

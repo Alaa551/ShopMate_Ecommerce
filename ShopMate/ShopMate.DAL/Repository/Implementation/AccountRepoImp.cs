@@ -9,10 +9,12 @@ namespace ShopMate.DAL.Repository.Implementation
     public class AccountRepoImp : IAccountRepo
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountRepoImp(UserManager<ApplicationUser> userManager)
+        public AccountRepoImp(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public async Task AddClaimsAsync(ApplicationUser applicationUser, IList<Claim> claims) =>
@@ -88,9 +90,26 @@ namespace ShopMate.DAL.Repository.Implementation
             return await _userManager.FindByNameAsync(userName) != null;
         }
 
-        public async Task UpdateUserAsync(ApplicationUser applicationUser)
+        public async Task<IdentityResult> UpdateUserAsync(ApplicationUser applicationUser)
         {
-            await _userManager.UpdateAsync(applicationUser);
+            return await _userManager.UpdateAsync(applicationUser);
         }
+
+        public async Task<ApplicationUser> GetUserById(string id)
+        {
+            return await _userManager.FindByIdAsync(id);
+        }
+
+        public async Task<IdentityResult> DeleteAccount(ApplicationUser user)
+        {
+            if (user == null)
+                return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+            return await _userManager.DeleteAsync(user);
+        }
+
+        //public async Task LogoutAsync()
+        //{
+        //    await _signInManager.SignOutAsync();
+        //}
     }
 }
