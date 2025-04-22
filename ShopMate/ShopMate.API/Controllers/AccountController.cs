@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopMate.BLL.DTO.AccountDto;
 using ShopMate.BLL.Service.Abstraction;
+using System.Security.Claims;
 
 namespace ShopMate.API.Controllers
 {
@@ -110,6 +112,7 @@ namespace ShopMate.API.Controllers
         #region Update Profile
 
         [HttpPut("UpdateProfile")]
+        [Authorize]
         public async Task<ActionResult> UpdateProfile(UpdateProfileDto profileDto)
         {
             var res = await _accountService.UpdateProfileAsync(profileDto);
@@ -130,6 +133,7 @@ namespace ShopMate.API.Controllers
         #region Delete Account
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> DeleteAccount(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -148,6 +152,32 @@ namespace ShopMate.API.Controllers
             return Ok("Account deleted successfully");
         }
         #endregion
+
+        [HttpPost("ChangePassword")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (String.IsNullOrWhiteSpace(userId))
+            {
+                return BadRequest("User not found");
+            }
+
+            var res = await _accountService.ChangePasswordAsync(userId, changePasswordDto);
+
+            if (!res.Succeeded)
+            {
+                foreach (var error in res.Errors)
+                {
+                    ModelState.AddModelError("", error);
+                }
+                return BadRequest(ModelState);
+            }
+
+            return Ok("Password changed successfully");
+
+        }
 
     }
 }

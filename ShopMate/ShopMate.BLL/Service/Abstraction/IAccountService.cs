@@ -19,6 +19,7 @@ namespace ShopMate.BLL.Service.Abstraction
         Task<Result> ResetPassword(ResetPasswordDto resetPasswordDto);
 
         //Task LogoutAsync();
+        Task<Result> ChangePasswordAsync(string userId, ChangePasswordDto changePasswordDto);
 
 
 

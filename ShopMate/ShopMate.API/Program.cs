@@ -71,6 +71,7 @@ namespace ShopMate.API
             builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
             builder.Services.AddScoped<IValidator<ResetPasswordDto>, ResetPasswordValidator>();
             builder.Services.AddScoped<IValidator<UpdateProfileDto>, UpdateProfileValidator>();
+            builder.Services.AddScoped<IValidator<ChangePasswordDto>, ChangePasswordValidator>();
 
             builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
             builder.Services.AddScoped<IEmailService, EmailService>();
@@ -112,6 +113,7 @@ namespace ShopMate.API
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

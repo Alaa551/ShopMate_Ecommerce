@@ -9,12 +9,14 @@ namespace ShopMate.DAL.Repository.Implementation
     public class AccountRepoImp : IAccountRepo
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        // private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AccountRepoImp(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountRepoImp(UserManager<ApplicationUser> userManager
+            //  SignInManager<ApplicationUser> signInManager
+            )
         {
             _userManager = userManager;
-            _signInManager = signInManager;
+            //  _signInManager = signInManager;
         }
 
         public async Task AddClaimsAsync(ApplicationUser applicationUser, IList<Claim> claims) =>
@@ -73,6 +75,7 @@ namespace ShopMate.DAL.Repository.Implementation
 
         public async Task<IList<Claim>> GetUserClaimsAsync(ApplicationUser user)
         {
+
             return await _userManager.GetClaimsAsync(user);
         }
 
@@ -105,6 +108,11 @@ namespace ShopMate.DAL.Repository.Implementation
             if (user == null)
                 return IdentityResult.Failed(new IdentityError { Description = "User not found" });
             return await _userManager.DeleteAsync(user);
+        }
+
+        public async Task<IdentityResult> ChangePassword(ApplicationUser user, string currentPassword, string newPassword)
+        {
+            return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
         }
 
         //public async Task LogoutAsync()

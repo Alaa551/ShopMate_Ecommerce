@@ -14,6 +14,7 @@ namespace ShopMate.BLL.Service.Implementation
         private readonly IValidator<LoginDto> _loginValidator;
         private readonly IValidator<ResetPasswordDto> _resetPasswordValidator;
         private readonly IValidator<UpdateProfileDto> _updateProfileValidator;
+        private readonly IValidator<ChangePasswordDto> _changePasswordValidator;
         private readonly IFileService _fileService;
         private readonly ITokenService _tokenService;
         private readonly IEmailService _emailService;
@@ -25,8 +26,8 @@ namespace ShopMate.BLL.Service.Implementation
                                  IEmailService emailService,
                                  IValidator<ResetPasswordDto> resetPasswordValidator,
                                  IFileService fileService,
-                                 IValidator<UpdateProfileDto> updateProfileValidator
-                                 )
+                                 IValidator<UpdateProfileDto> updateProfileValidator,
+                                 IValidator<ChangePasswordDto> changePasswordValidator)
         {
             _accountRepo = accountRepo;
             _registerValidator = registerValidator;
@@ -36,6 +37,7 @@ namespace ShopMate.BLL.Service.Implementation
             _resetPasswordValidator = resetPasswordValidator;
             _fileService = fileService;
             _updateProfileValidator = updateProfileValidator;
+            _changePasswordValidator = changePasswordValidator;
         }
 
         #region Confirm Email
@@ -74,11 +76,12 @@ namespace ShopMate.BLL.Service.Implementation
                 };
             }
             var user = loginDto.ToApplicationUser();
+            var userfromDb = await _accountRepo.GetUserByEmail(user.Email!);
             var res = await _accountRepo.CheckUserAsync(user, loginDto.Password!);
 
             if (res)
             {
-                var claims = await _accountRepo.GetUserClaimsAsync(user);
+                var claims = await _accountRepo.GetUserClaimsAsync(userfromDb);
                 var token = _tokenService.GenerateToken(claims);
                 return new Result
                 {
@@ -111,11 +114,13 @@ namespace ShopMate.BLL.Service.Implementation
                 if (res.Succeeded)
                 {
                     //create token
-                    List<Claim> claims = new List<Claim>();
-
-                    claims.Add(new Claim("Role", "Customer"));
-                    claims.Add(new Claim("UserName", registerDto.UserName!));
-
+                    var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.NameIdentifier, user.Id),
+                            new Claim(ClaimTypes.Email, user.Email),
+                            new Claim(ClaimTypes.Role, "Customer"),
+                            new Claim(ClaimTypes.Name, user.UserName)
+                        };
                     await _accountRepo.AddClaimsAsync(user, claims);
 
                     return new Result
@@ -247,6 +252,38 @@ namespace ShopMate.BLL.Service.Implementation
             {
                 _fileService.DeleteFileAsync(profileImagePath);
             }
+        }
+
+        public async Task<Result> ChangePasswordAsync(string userId, ChangePasswordDto changePasswordDto)
+        {
+            var validationResult = await _changePasswordValidator.ValidateAsync(changePasswordDto);
+
+            if (!validationResult.IsValid)
+            {
+                return new Result
+                {
+                    Succeeded = false,
+                    Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
+                };
+            }
+
+            var user = await _accountRepo.GetUserById(userId);
+            if (user == null)
+            {
+                return new Result
+                {
+                    Succeeded = false,
+                    Errors = new List<string> { "User not found." }
+                };
+            }
+
+            var res = await _accountRepo.ChangePassword(user, changePasswordDto.CurrentPassword!, changePasswordDto.NewPassword!);
+
+            return new Result
+            {
+                Succeeded = res.Succeeded,
+                Errors = res.Errors.Select(e => e.Description).ToList()
+            };
         }
 
         //public async Task LogoutAsync()

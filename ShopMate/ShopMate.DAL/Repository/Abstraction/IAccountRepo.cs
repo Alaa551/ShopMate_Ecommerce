@@ -23,5 +23,7 @@ namespace ShopMate.DAL.Repository.Abstraction
         Task<IdentityResult> DeleteAccount(ApplicationUser user);
 
         //Task LogoutAsync();
+
+        Task<IdentityResult> ChangePassword(ApplicationUser user, string currentPassword, string newPassword);
     }
 }
