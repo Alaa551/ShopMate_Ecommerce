@@ -1,10 +1,19 @@
 
+using BLL.Settings;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ShopMate.BLL.DTO.AccountDto;
+using ShopMate.BLL.Service.Abstraction;
+using ShopMate.BLL.Service.Implementation;
+using ShopMate.BLL.Validation;
 using ShopMate.DAL.Database;
 using ShopMate.DAL.Database.Models;
+using ShopMate.DAL.Repository.Abstraction;
+using ShopMate.DAL.Repository.Implementation;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace ShopMate.API
 {
@@ -16,8 +25,11 @@ namespace ShopMate.API
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
-
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             builder.Services.AddDbContext<AppDbContext>(option =>
             {
@@ -48,9 +60,47 @@ namespace ShopMate.API
                 };
             });
 
+
+
+
+            builder.Services.AddScoped<IAccountService, AccountServiceImp>();
+            builder.Services.AddScoped<IAccountRepo, AccountRepoImp>();
+            builder.Services.AddScoped<ITokenService, TokenServiceImp>();
+
+            builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
+            builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
+            builder.Services.AddScoped<IValidator<ResetPasswordDto>, ResetPasswordValidator>();
+            builder.Services.AddScoped<IValidator<UpdateProfileDto>, UpdateProfileValidator>();
+            builder.Services.AddScoped<IValidator<ChangePasswordDto>, ChangePasswordValidator>();
+
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IFileService, FileServiceImp>();
+
+
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
+            {
+                opt.TokenLifespan = TimeSpan.FromMinutes(30);
+            });
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("MyPolicy", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+
+                });
+
+            });
+
+
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
 
             var app = builder.Build();
 
@@ -63,6 +113,7 @@ namespace ShopMate.API
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
 
