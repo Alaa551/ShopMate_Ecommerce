@@ -22,7 +22,7 @@ namespace ShopMate.BLL.Service.Implementation
             SecurityKey securityKey = new SymmetricSecurityKey(securtykeyByte);
             SigningCredentials signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var expire = DateTime.UtcNow.AddDays(2);
+            var expire = DateTime.UtcNow.AddDays(1);
             JwtSecurityToken jwtSecurityToken = new JwtSecurityToken(claims: claims, expires: expire, signingCredentials: signingCredentials);
 
 

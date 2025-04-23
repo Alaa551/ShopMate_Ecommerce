@@ -2,7 +2,10 @@
 using ShopMate.BLL.DTO.AccountDto;
 using ShopMate.BLL.Mapping;
 using ShopMate.BLL.Service.Abstraction;
+using ShopMate.DAL.Database.Models;
+using ShopMate.DAL.Enums;
 using ShopMate.DAL.Repository.Abstraction;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace ShopMate.BLL.Service.Implementation
@@ -82,6 +85,8 @@ namespace ShopMate.BLL.Service.Implementation
             if (res)
             {
                 var claims = await _accountRepo.GetUserClaimsAsync(userfromDb);
+                claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
+
                 var token = _tokenService.GenerateToken(claims);
                 return new Result
                 {
@@ -104,41 +109,61 @@ namespace ShopMate.BLL.Service.Implementation
 
             var validationResult = await _registerValidator.ValidateAsync(registerDto);
 
-            if (validationResult.IsValid)
+
+            if (!validationResult.IsValid)
             {
-                var user = registerDto.ToApplicationUser();
-                user.ProfileImagePath = await _fileService.SaveFileAsync(registerDto.ProfileImage);
-
-
-                var res = await _accountRepo.CreateUserAsync(user, registerDto.Password!);
-                if (res.Succeeded)
+                return new Result
                 {
-                    //create token
-                    var claims = new List<Claim>
+                    Succeeded = false,
+                    Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
+                };
+            }
+
+
+            var user = registerDto.ToApplicationUser();
+            AddUserImage(registerDto, user);
+
+            var res = await _accountRepo.CreateUserAsync(user, registerDto.Password!);
+            if (res.Succeeded)
+            {
+                //create token
+                var claims = new List<Claim>
                         {
                             new Claim(ClaimTypes.NameIdentifier, user.Id),
                             new Claim(ClaimTypes.Email, user.Email),
                             new Claim(ClaimTypes.Role, "Customer"),
-                            new Claim(ClaimTypes.Name, user.UserName)
+                            new Claim(ClaimTypes.Name, user.UserName),
+                            //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                         };
-                    await _accountRepo.AddClaimsAsync(user, claims);
+                await _accountRepo.AddClaimsAsync(user, claims);
 
-                    return new Result
-                    {
-                        Succeeded = true
-                    };
+                return new Result
+                {
+                    Succeeded = true
+                };
 
-                }
             }
             return new Result
             {
                 Succeeded = false,
-                Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
+                Errors = res.Errors.Select(e => e.Description).ToList()
+
             };
-
-
         }
 
+        private void AddUserImage(RegisterDto registerDto, ApplicationUser user)
+        {
+            if (registerDto.ProfileImage != null)
+            {
+                user.ProfileImagePath = _fileService.SaveFileAsync(registerDto.ProfileImage).Result;
+            }
+            else
+            {
+                var defaultFileName = user.Gender == Gender.Female ? "default-female.png" : "default-male.png";
+                user.ProfileImagePath = $"/Uploads/{defaultFileName}";
+            }
+
+        }
 
 
         #endregion
@@ -157,13 +182,13 @@ namespace ShopMate.BLL.Service.Implementation
 
         public async Task<Result> ResetPassword(ResetPasswordDto resetPasswordDto)
         {
-            var res = _resetPasswordValidator.ValidateAsync(resetPasswordDto);
-            if (!res.Result.IsValid)
+            var validationResult = await _resetPasswordValidator.ValidateAsync(resetPasswordDto);
+            if (!validationResult.IsValid)
             {
                 return new Result
                 {
                     Succeeded = false,
-                    Errors = res.Result.Errors.Select(e => e.ErrorMessage).ToList()
+                    Errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList()
                 };
             }
 

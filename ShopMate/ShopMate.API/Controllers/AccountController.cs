@@ -30,7 +30,7 @@ namespace ShopMate.API.Controllers
                 }
                 return BadRequest(ModelState);
             }
-            return Ok($"Login Succeeded\nYour Token: {res.Token}");
+            return Ok(res.Token);
         }
 
         [HttpPost("Register")]
@@ -57,7 +57,7 @@ namespace ShopMate.API.Controllers
             var res = await _accountService.SendConfirmEmailCode(email);
             if (!res)
             {
-                return BadRequest("Confirm not success");
+                return BadRequest("Email didn't send");
             }
             return Ok("Email sent successfully");
         }
@@ -85,7 +85,7 @@ namespace ShopMate.API.Controllers
             var res = await _accountService.SendResetPasswordToken(email);
             if (!res)
             {
-                return BadRequest("Email not sent successfully");
+                return BadRequest("Email didn't send");
             }
             return Ok("Email sent successfully");
         }
@@ -113,7 +113,7 @@ namespace ShopMate.API.Controllers
 
         [HttpPut("UpdateProfile")]
         [Authorize]
-        public async Task<ActionResult> UpdateProfile(UpdateProfileDto profileDto)
+        public async Task<ActionResult> UpdateProfile([FromBody] UpdateProfileDto profileDto)
         {
             var res = await _accountService.UpdateProfileAsync(profileDto);
             if (!res.Succeeded)

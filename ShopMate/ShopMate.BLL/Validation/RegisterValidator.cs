@@ -46,17 +46,17 @@ namespace ShopMate.BLL.Validation
             .IsInEnum().WithMessage("Please select a valid gender");
 
             RuleFor(x => x.ProfileImage)
-            .NotNull().WithMessage("Profile image is required")
-            .Must(file => file.Length <= 3 * 1024 * 1024)
-                .WithMessage("File size must be less than 2MB")
-            .Must(file =>
-            {
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
-                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-                return allowedExtensions.Contains(extension);
-            })
-            .WithMessage("Only .jpg, .jpeg, or .png files are allowed");
+             .Must(file => file == null || file.Length <= 3 * 1024 * 1024)
+                 .WithMessage("File size must be less than 3MB")
+             .Must(file =>
+             {
+                 if (file == null) return true;
 
+                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+                 var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+                 return allowedExtensions.Contains(extension);
+             })
+             .WithMessage("Only .jpg, .jpeg, or .png files are allowed");
         }
     }
 
