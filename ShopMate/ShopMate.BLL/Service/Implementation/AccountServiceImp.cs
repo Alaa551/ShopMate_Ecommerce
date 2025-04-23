@@ -259,7 +259,7 @@ namespace ShopMate.BLL.Service.Implementation
             var user = await _accountRepo.GetUserById(id);
             var result = await _accountRepo.DeleteAccount(user);
 
-            if (result.Succeeded)
+            if (result.Succeeded && !user.ProfileImagePath!.Contains("default"))
             {
                 await DeleteUserImage(user.ProfileImagePath);
             }
