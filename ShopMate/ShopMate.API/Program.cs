@@ -10,7 +10,6 @@ using ShopMate.BLL.Service.Implementation;
 using ShopMate.BLL.Validation;
 using ShopMate.DAL.Database;
 using ShopMate.DAL.Database.Models;
-using ShopMate.DAL.Database.Seeding;
 using ShopMate.DAL.Repository.Abstraction;
 using ShopMate.DAL.Repository.Implementation;
 using System.Text;
@@ -20,7 +19,7 @@ namespace ShopMate.API
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -128,16 +127,6 @@ namespace ShopMate.API
 
 
             app.MapControllers();
-
-
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<AppDbContext>();
-                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-
-                await DbSeeder.SeedAsync(context, userManager);
-            }
 
             app.Run();
         }
