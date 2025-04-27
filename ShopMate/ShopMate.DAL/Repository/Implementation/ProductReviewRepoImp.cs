@@ -41,5 +41,13 @@ namespace ShopMate.DAL.Repository.Implementation
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<ProductReview?> GetReviewByIdAsync(int id)
+        {
+            return await _context.ProductReviews
+                                 .Include(r => r.Product)
+                                 .Include(r => r.User)
+                                 .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
     }
 }

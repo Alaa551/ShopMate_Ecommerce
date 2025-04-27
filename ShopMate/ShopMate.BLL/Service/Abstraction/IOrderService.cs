@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ShopMate.BLL.DTO.AdminDto;
 
 namespace ShopMate.BLL.Service.Abstraction
 {
-    internal class IOrderService
+    public interface IOrderService
     {
+        Task<List<OrderDto>> GetAllOrdersAsync();
+        Task<OrderDetailsDto> GetOrderByIdAsync(int id);
+        Task<bool> UpdateOrderStatusAsync(int orderId, string newStatus);
     }
 }

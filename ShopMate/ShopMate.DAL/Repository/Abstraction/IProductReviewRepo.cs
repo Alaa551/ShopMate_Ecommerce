@@ -7,6 +7,8 @@ namespace ShopMate.DAL.Repository.Abstraction
         Task<IEnumerable<ProductReview>> GetAllReviewsAsync();
 
         Task<IEnumerable<ProductReview>> GetReviewsByProductIdAsync(int productId);
+        Task<ProductReview?> GetReviewByIdAsync(int id);
+
 
         Task DeleteReviewAsync(int reviewId);
     }

@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ShopMate.BLL.DTO.AdminDto;
 
 namespace ShopMate.BLL.Service.Abstraction
 {
-    internal class IProductReviewService
+    public interface IProductReviewService
     {
+        Task<List<ProductReviewDto>> GetAllReviewsAsync();
+        Task<ProductReviewDto> GetReviewByIdAsync(int id);
+        Task<List<ProductReviewDto>> GetReviewsByProductIdAsync(int productId);
+
+        Task<bool> DeleteReviewAsync(int reviewId);
     }
 }

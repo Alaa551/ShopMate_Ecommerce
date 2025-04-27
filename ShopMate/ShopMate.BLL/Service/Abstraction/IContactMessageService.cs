@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ShopMate.BLL.DTO.AdminDto;
 
 namespace ShopMate.BLL.Service.Abstraction
 {
-    internal class IContactMessageService
+    public interface IContactMessageService
     {
+        Task<List<ContactMessageDto>> GetAllMessagesAsync();
+        Task<ContactMessageDto> GetMessageByIdAsync(int id);
+        Task<bool> UpdateMessageStatusAsync(int messageId, String newStatus);
     }
 }
