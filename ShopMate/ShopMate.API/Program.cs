@@ -22,6 +22,7 @@ namespace ShopMate.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddScoped<IProductService, ProductService>();
 
             // Add services to the container.
 

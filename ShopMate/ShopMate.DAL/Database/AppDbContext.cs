@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using ShopMate.DAL.Database.Models;
 
-
 namespace ShopMate.DAL.Database
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
@@ -25,10 +24,19 @@ namespace ShopMate.DAL.Database
 
         public DbSet<OrderNotification> OrderNotifications { get; set; }
         public DbSet<OfferNotification> OfferNotifications { get; set; }
+        public IEnumerable<object> Items { get; internal set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
 
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("server = .; database = ShopMate_Ecommerce_Database ;Trusted_Connection=True; TrustServerCertificate=True;");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,5 +45,6 @@ namespace ShopMate.DAL.Database
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         }
+
     }
 }
