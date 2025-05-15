@@ -28,5 +28,21 @@ namespace ShopMate.BLL.Mapping
              Email = loginDto.Email,
          };
 
+
+        public static ProfileDto ToProfile(this ApplicationUser applicationUser) =>
+
+       new ProfileDto
+       {
+           Id = applicationUser.Id,
+           FirstName = applicationUser.FirstName,
+           LastName = applicationUser.LastName,
+           UserName = applicationUser.UserName,
+           Email = applicationUser.Email,
+           PhoneNumber = applicationUser.PhoneNumber,
+           Address = applicationUser.Address,
+           Gender = applicationUser.Gender,
+           ProfileImagePath = applicationUser.ProfileImagePath
+       };
+
     }
 }
