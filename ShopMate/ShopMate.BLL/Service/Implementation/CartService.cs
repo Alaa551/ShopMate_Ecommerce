@@ -11,7 +11,7 @@ namespace ShopMate.BLL.Service.Implementation
 {
     public class CartService : ICartService
     {
-        private readonly ICartRepository _cartRepository;
+        private readonly ICartReposit ory _cartRepository;
 
         public CartService(ICartRepository cartRepository)
         {
