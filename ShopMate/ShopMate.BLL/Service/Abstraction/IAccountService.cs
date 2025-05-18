@@ -8,6 +8,7 @@ namespace ShopMate.BLL.Service.Abstraction
         Task<Result> Login(LoginDto loginDto);
 
         Task<Result> UpdateProfileAsync(UpdateProfileDto updateProfileDto);
+        Task<ProfileDto> GetProfileAsync(string userId);
 
         Task<Result> DeleteAccount(string id);
 

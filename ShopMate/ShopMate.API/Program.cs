@@ -83,13 +83,20 @@ namespace ShopMate.API
 			builder.Services.AddScoped<IValidator<ResetPasswordDto>, ResetPasswordValidator>();
 			builder.Services.AddScoped<IValidator<UpdateProfileDto>, UpdateProfileValidator>();
 			builder.Services.AddScoped<IValidator<ChangePasswordDto>, ChangePasswordValidator>();
-			//=======
-			//			//builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
-			//			//builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
-			//			//builder.Services.AddScoped<IValidator<ResetPasswordDto>, ResetPasswordValidator>();
-			//			//builder.Services.AddScoped<IValidator<UpdateProfileDto>, UpdateProfileValidator>();
-			//			//builder.Services.AddScoped<IValidator<ChangePasswordDto>, ChangePasswordValidator>();
-			//>>>>>>> main
+            builder.Services.AddScoped<IOrderService, OrderServiceImp>();
+            builder.Services.AddScoped<IOrderRepo, OrderRepoImp>();
+
+            builder.Services.AddScoped<IContactMessageService, ContactMessageServiceImp>();
+            builder.Services.AddScoped<IContactMessageRepo, ContactMessageRepoImp>();
+
+            builder.Services.AddScoped<IProductReviewService, ProductReviewServiceImp>();
+            builder.Services.AddScoped<IProductReviewRepo, ProductReviewRepoImp>();
+
+            builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
+            builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
+            builder.Services.AddScoped<IValidator<ResetPasswordDto>, ResetPasswordValidator>();
+            builder.Services.AddScoped<IValidator<UpdateProfileDto>, UpdateProfileValidator>();
+            builder.Services.AddScoped<IValidator<ChangePasswordDto>, ChangePasswordValidator>();
 
 			builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 			builder.Services.AddScoped<IEmailService, EmailService>();
