@@ -18,6 +18,58 @@ using System.Text.Json.Serialization;
 
 namespace ShopMate.API
 {
+
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddScoped<IProductService, ProductService>();
+
+            // Add services to the container.
+
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
+
+            builder.Services.AddDbContext<AppDbContext>(option =>
+            {
+                option.UseSqlServer(builder.Configuration.GetConnectionString("cs"));
+            });
+
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+                   options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider
+               )
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+            builder.Services.AddAuthentication(option =>
+            {
+                option.DefaultAuthenticateScheme = "jwt";
+                option.DefaultChallengeScheme = "jwt";
+            }).AddJwtBearer("jwt", options =>
+            {
+                var securitykeystring = builder.Configuration.GetSection("SecretKey").Value;
+                var securtykeyByte = Encoding.ASCII.GetBytes(securitykeystring!);
+                SecurityKey securityKey = new SymmetricSecurityKey(securtykeyByte);
+
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    IssuerSigningKey = securityKey,
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
+
+
+
+            builder.Services.AddScoped<IAccountService, AccountServiceImp>();
+            builder.Services.AddScoped<IAccountRepo, AccountRepoImp>();
+            builder.Services.AddScoped<ITokenService, TokenServiceImp>();
+
 	public class Program
 	{
 		public static void Main(string[] args)
@@ -91,6 +143,7 @@ namespace ShopMate.API
 
             builder.Services.AddScoped<IProductReviewService, ProductReviewServiceImp>();
             builder.Services.AddScoped<IProductReviewRepo, ProductReviewRepoImp>();
+
 
             builder.Services.AddScoped<IValidator<LoginDto>, LoginValidator>();
             builder.Services.AddScoped<IValidator<RegisterDto>, RegisterValidator>();
