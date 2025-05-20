@@ -34,7 +34,7 @@ namespace ShopMate.API.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<ActionResult> Register(RegisterDto registerDto)
+        public async Task<ActionResult> Register([FromForm] RegisterDto registerDto)
         {
             var res = await _accountService.Register(registerDto);
             if (!res.Succeeded)
@@ -92,7 +92,7 @@ namespace ShopMate.API.Controllers
 
 
         [HttpPost("ResetPassword")]
-        public async Task<IActionResult> ResetPassword(ResetPasswordDto resetPasswordDto)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
             var res = await _accountService.ResetPassword(resetPasswordDto);
             if (!res.Succeeded)
@@ -109,11 +109,11 @@ namespace ShopMate.API.Controllers
 
         #endregion
 
-        #region Update Profile
+        #region Profile
 
-        [HttpPut("UpdateProfile")]
+        [HttpPut("Profile")]
         [Authorize]
-        public async Task<ActionResult> UpdateProfile([FromBody] UpdateProfileDto profileDto)
+        public async Task<ActionResult> Profile([FromForm] UpdateProfileDto profileDto)
         {
             var res = await _accountService.UpdateProfileAsync(profileDto);
             if (!res.Succeeded)
@@ -124,7 +124,19 @@ namespace ShopMate.API.Controllers
                 }
                 return BadRequest(ModelState);
             }
-            return Ok("Profile updated Successfully");
+            return Ok(profileDto);
+        }
+
+        [HttpGet("Profile")]
+        [Authorize]
+        public async Task<ActionResult> Profile(string userId)
+        {
+            var profile = await _accountService.GetProfileAsync(userId);
+            if (profile == null)
+            {
+                return NotFound();
+            }
+            return Ok(profile);
         }
 
         #endregion
@@ -134,7 +146,7 @@ namespace ShopMate.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Customer")]
-        public async Task<IActionResult> DeleteAccount(string id)
+        public async Task<IActionResult> Account(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("User ID is required.");

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ShopMate.DAL.Database.Models;
 using ShopMate.DAL.Repository.Abstraction;
-using System.Net;
 using System.Security.Claims;
 
 namespace ShopMate.DAL.Repository.Implementation
@@ -84,7 +83,7 @@ namespace ShopMate.DAL.Repository.Implementation
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return null;
-            var res = await _userManager.ResetPasswordAsync(user, WebUtility.UrlDecode(token), newPassword);
+            var res = await _userManager.ResetPasswordAsync(user, token, newPassword);
             return res;
         }
 

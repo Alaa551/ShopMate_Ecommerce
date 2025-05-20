@@ -20,6 +20,7 @@ namespace ShopMate.BLL.Validation
                 .NotEmpty().WithMessage("LastName is required");
 
             RuleFor(x => x.UserName)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage("UserName is required")
                 .MustAsync(async (userName, _) => !await _accountRepo.IsUserNameExistsAsync(userName!))
                 .WithMessage("UserName already exists");
@@ -27,6 +28,7 @@ namespace ShopMate.BLL.Validation
 
 
             RuleFor(x => x.Email)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage("Email is required")
                 .EmailAddress().WithMessage("Invalid email format")
                 .MustAsync(async (email, _) => (await _accountRepo.GetUserByEmail(email)) == null)

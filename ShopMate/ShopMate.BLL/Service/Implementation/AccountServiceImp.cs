@@ -133,6 +133,7 @@ namespace ShopMate.BLL.Service.Implementation
                             new Claim(ClaimTypes.Email, user.Email),
                             new Claim(ClaimTypes.Role, "Customer"),
                             new Claim(ClaimTypes.Name, user.UserName),
+                            new Claim("ProfileImagePath", user.ProfileImagePath),
                             //new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                         };
                 await _accountRepo.AddClaimsAsync(user, claims);
@@ -206,7 +207,16 @@ namespace ShopMate.BLL.Service.Implementation
         #endregion
 
 
-        #region Update Profile
+        #region  Profile
+
+        public async Task<ProfileDto> GetProfileAsync(string userId)
+        {
+            var user = await _accountRepo.GetUserById(userId);
+            var profile = user.ToProfile();
+            return profile;
+
+        }
+
         public async Task<Result> UpdateProfileAsync(UpdateProfileDto updateProfileDto)
         {
             var user = await _accountRepo.GetUserById(updateProfileDto.Id!);
@@ -230,11 +240,13 @@ namespace ShopMate.BLL.Service.Implementation
                 user.LastName = updateProfileDto.LastName;
                 user.Gender = updateProfileDto.Gender;
                 user.PhoneNumber = updateProfileDto.PhoneNumber;
+                user.Address = updateProfileDto.Address;
 
                 var profileImage = updateProfileDto.ProfileImage == null
                     ? user.ProfileImagePath
                     : await _fileService.SaveFileAsync(updateProfileDto.ProfileImage);
                 user.ProfileImagePath = profileImage;
+                updateProfileDto.ProfileImagePath = profileImage;
 
                 var result = await _accountRepo.UpdateUserAsync(user);
 
@@ -311,10 +323,7 @@ namespace ShopMate.BLL.Service.Implementation
             };
         }
 
-        //public async Task LogoutAsync()
-        //{
-        //    await _accountRepo.LogoutAsync();
-        //}
+
     }
 }
 
